@@ -163,7 +163,7 @@
     <odometryFrame>odom</odometryFrame>
     <publishTf>1</publishTf>
     <publishOdom>true</publishOdom>
-    <publishOdomTF>false</publishOdomTF>
+    <publishOdomTF>true</publishOdomTF>
     <publishWheelJointState>false</publishWheelJointState>
     <publishWheelTF>false</publishWheelTF>
   </plugin>
