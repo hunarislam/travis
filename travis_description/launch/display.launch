@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="model" default="$(find travis_description)/urdf/travis.xacro"/>
+  <!-- <arg name="model" default="$(find travis_description)/urdf/travis.xacro"/> -->
   <arg name="gui" default="true"/>
   <arg name="rvizconfig" default="$(find travis_description)/launch/urdf.rviz"/>
 
