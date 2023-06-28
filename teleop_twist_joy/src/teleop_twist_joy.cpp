@@ -162,8 +162,7 @@ void TeleopTwistJoy::Impl::joyCallback(const sensor_msgs::Joy::ConstPtr& joy_msg
   {
     sendCmdVelMsg(joy_msg, "turbo");
   }
-  else if (joy_msg->buttons.size() > enable_button &&
-           joy_msg->buttons[enable_button])
+  else if (1)
   {
     sendCmdVelMsg(joy_msg, "normal");
   }
