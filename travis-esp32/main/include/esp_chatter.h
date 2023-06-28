@@ -7,7 +7,7 @@ extern "C" {
 
 void rosserial_setup();
 
-void rosserial_publish(int enc_msg);
+void odom_pub(float vel_x, float vel_z);
 
 #ifdef __cplusplus
 }

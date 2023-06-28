@@ -1,5 +1,5 @@
-#include "ros.h"
-#include "nav_msgs/Odometry.h"
+#include "/home/foodl/esp/esp-idf/components/rosserial_esp32/include/ros.h"
+#include "/home/foodl/esp/esp-idf/components/rosserial_esp32/include/nav_msgs/Odometry.h"
 #include "esp_chatter.h"
 #include <string>
 
@@ -17,9 +17,9 @@ void rosserial_setup()
   nh.advertise(chatter);
 }
 
-void rosserial_publish(int enc_msg)
+void odom_pub(float vel_x, float vel_z)
 {
-  / Populate the Odometry message
+  // Populate the Odometry message
   // Set the header
   odom.header.stamp = nh.now();
   odom.header.frame_id = "odom";
@@ -36,13 +36,13 @@ void rosserial_publish(int enc_msg)
   odom.pose.pose.orientation.w = 1.0;
 
   // Set the twist
-  odom.twist.twist.linear.x = 0.0;
+  odom.twist.twist.linear.x = vel_x;
   odom.twist.twist.linear.y = 0.0;
   odom.twist.twist.linear.z = 0.0;
 
   odom.twist.twist.angular.x = 0.0;
   odom.twist.twist.angular.y = 0.0;
-  odom.twist.twist.angular.z = 0.0;
+  odom.twist.twist.angular.z = vel_z;
   // Send the message
   chatter.publish(&odom);
   nh.spinOnce();

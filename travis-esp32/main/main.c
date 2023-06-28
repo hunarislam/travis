@@ -35,6 +35,7 @@ double kp_right = 3.7;
 double ki_right = 0;
 double kd_right = 0;
 
+double wheelbase = 0.284;
 double setpoint_left = 10;  // desired velocity in m/s
 double setpoint_right = -10; // desired velocity in m/s
 double error_left;
@@ -49,6 +50,7 @@ double duty_cycle_left;
 double duty_cycle_right;
 bool direction_left = 0; // Forward
 bool direction_right = 1; // Forward
+float vel_left, vel_right;
 
 #define GPIO_PWM_LEFT 13  //Set GPIO 13 as PWM0A / Left PWM
 #define GPIO_PWM_RIGHT 15   //Set GPIO 15 as PWM0B / Right PWM
@@ -155,8 +157,8 @@ void encoder_reader(void){
     int encoder_right_val = 0;
     int encoder_left_prev_val = 0;
     int encoder_right_prev_val = 0;
-    float vel_left = 0;
-    float vel_right = 0;
+    vel_left = 0;
+    vel_right = 0;
     while (1)
     {
         encoder_left_val = encoder_left->get_counter_value(encoder_left);
@@ -166,16 +168,30 @@ void encoder_reader(void){
         vel_right = 3.1415 * (encoder_right_val - encoder_right_prev_val) / 30;
         
         ESP_LOGI(TAG, "%f, %f, %f", vel_left, vel_right, duty_cycle_left);
-        rosserial_publish(vel_left + vel_right);
+        // rosserial_publish(vel_left + vel_right);
+        float vel_x = (vel_left + vel_right) / 2.0;
+        float vel_z = (vel_right - vel_left) / wheelbase;
+        
+        odom_pub(vel_x, vel_z);
         vTaskDelay(pdMS_TO_TICKS(100));
         updatePID(vel_left, vel_right); //m/s
         encoder_left_prev_val = encoder_left_val;
         encoder_right_prev_val = encoder_right_val;
     }
-} 
+}
+
+void odom_publisher(void)
+{
+    float vel_x = (vel_left + vel_right) / 2.0;
+    float vel_z = (vel_right - vel_left) / wheelbase;
+
+    odom_pub(vel_x, vel_z);
+    vTaskDelay(pdMS_TO_TICKS(100));
+}
 void app_main(void)
 {   
     printf("Testing brushed motor...\n");
     xTaskCreate(encoder_reader, "encoder_reader", 4096, NULL, 5, NULL);
     xTaskCreate(motor_controller, "motor_controller", 4096, NULL, 4, NULL);
+    // xTaskCreate(odom_publisher, "odom_publisher", 4096, NULL, 3, NULL);
 }
