@@ -1,6 +1,5 @@
 #include "ros.h"
-#include "std_msgs/String.h"
-#include "std_msgs/Int32.h"
+#include "nav_msgs/Odometry.h"
 #include "esp_chatter.h"
 #include <string>
 
@@ -8,9 +7,8 @@ using namespace std;
 
 ros::NodeHandle nh;
 
-std_msgs::String str_msg;
-std_msgs::Int32 int_msg;
-ros::Publisher chatter("chatter", &int_msg);
+nav_msgs::Odometry odom;
+ros::Publisher chatter("odom", &odom);
 
 void rosserial_setup()
 {
@@ -21,8 +19,31 @@ void rosserial_setup()
 
 void rosserial_publish(int enc_msg)
 {
-  int_msg.data = enc_msg;
+  / Populate the Odometry message
+  // Set the header
+  odom.header.stamp = nh.now();
+  odom.header.frame_id = "odom";
+  odom.child_frame_id = "base_footprint";
+
+  // Set the pose
+  odom.pose.pose.position.x = 0.0;
+  odom.pose.pose.position.y = 0.0;
+  odom.pose.pose.position.z = 0.0;
+
+  odom.pose.pose.orientation.x = 0.0;
+  odom.pose.pose.orientation.y = 0.0;
+  odom.pose.pose.orientation.z = 0.0;
+  odom.pose.pose.orientation.w = 1.0;
+
+  // Set the twist
+  odom.twist.twist.linear.x = 0.0;
+  odom.twist.twist.linear.y = 0.0;
+  odom.twist.twist.linear.z = 0.0;
+
+  odom.twist.twist.angular.x = 0.0;
+  odom.twist.twist.angular.y = 0.0;
+  odom.twist.twist.angular.z = 0.0;
   // Send the message
-  chatter.publish(&int_msg);
+  chatter.publish(&odom);
   nh.spinOnce();
 }
