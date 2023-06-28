@@ -3,11 +3,11 @@
   <param name="robot_description" command="$(find xacro)/xacro $(find travis_description)/urdf/travis.xacro"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-  <arg name="world_name" value="$(find travis_description)/worlds/cafu_world/model.sdf"/>
+  <!-- <arg name="world_name" value="$(find travis_description)/worlds/cafu_world/model.sdf"/> -->
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="headless" value="false"/>
+    <arg name="gui" value="false"/>
+    <arg name="headless" value="true"/>
     <arg name="debug" value="false"/>
   </include>
 

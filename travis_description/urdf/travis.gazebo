@@ -8,6 +8,7 @@
 <gazebo>
   <plugin name="control" filename="libgazebo_ros_control.so"/>
 </gazebo>
+
 <gazebo reference="base_link">
   <material>${body_color}</material>
   <mu1>0.2</mu1>
@@ -169,13 +170,7 @@
   </plugin>
 </gazebo>
 
-<!-- <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-        <robotNamespace>/</robotNamespace>
-    </plugin>
-</gazebo> -->
-
-<!-- hokuyo -->
+<!-- RP Lidar A1 -->
   <gazebo reference="lidar_1">
     <material>${lidar}</material>
     <sensor type="ray" name="head_hokuyo_sensor">
@@ -187,8 +182,6 @@
           <horizontal>
             <samples>1440</samples>
             <resolution>1</resolution>
-            <!-- <min_angle>-1.570796</min_angle>
-            <max_angle>1.570796</max_angle> -->
             <min_angle>-3.14</min_angle>
             <max_angle>3.14</max_angle>
           </horizontal>
@@ -212,7 +205,7 @@
   </gazebo>
 
   <!-- camera -->
-  <gazebo reference="camera_1">
+  <!-- <gazebo reference="camera_1">
     <sensor type="camera" name="camera1">
       <update_rate>15.0</update_rate>
       <camera name="head">
@@ -228,9 +221,6 @@
         </clip>
         <noise>
           <type>gaussian</type>
-          <!-- Noise is sampled independently per pixel on each frame.
-               That pixel's noise value is added to each of its color
-               channels, which at that point lie in the range [0,1]. -->
           <mean>0.0</mean>
           <stddev>0.007</stddev>
         </noise>
@@ -251,6 +241,6 @@
         <distortionT2>0.0</distortionT2>
       </plugin>
     </sensor>
-  </gazebo>
+  </gazebo> -->
 
 </robot>
