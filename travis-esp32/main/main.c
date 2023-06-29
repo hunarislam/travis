@@ -28,19 +28,16 @@ static const char *TAG = "Wheel Velocities";
 //////////////////////////
 
 // PID Constants
-double kp_left = 4;
-double ki_left = 0;
-double kd_left = 0;
+float kp_left = 4;
+float ki_left = 0;
+float kd_left = 0;
 
-double kp_right = 3.7;
-double ki_right = 0;
-double kd_right = 0;
+float kp_right = 3.7;
+float ki_right = 0;
+float kd_right = 0;
 
 // Encoder Constants
-double wheelbase = 0.284;
-// TODO: Change setpoints accourding to the cmd_vel
-double setpoint_left = 10;  // desired velocity in m/s
-double setpoint_right = 10; // desired velocity in m/s
+float wheelbase = 0.284;
 bool direction_left = 0; // Forward
 bool direction_right = 1; // Forward
 
@@ -50,20 +47,22 @@ bool direction_right = 1; // Forward
 #define GPIO_DIR_RIGHT GPIO_NUM_2
 
 // PID Variables
-double error_left;
-double error_right;
-double prev_error_left;
-double prev_error_right;
-double integral_left;
-double integral_right;
-double derivative_left;
-double derivative_right;
-double duty_cycle_left;
-double duty_cycle_right;
+float error_left;
+float error_right;
+float prev_error_left;
+float prev_error_right;
+float integral_left;
+float integral_right;
+float derivative_left;
+float derivative_right;
+float duty_cycle_left;
+float duty_cycle_right;
+float setpoint_left;
+float setpoint_right;
 float vel_left, vel_right;
 
 
-void updatePID(double current_velocity_left, double current_velocity_right) {
+void updatePID(float current_velocity_left, float current_velocity_right) {
   error_left = setpoint_left - current_velocity_left;
   error_right = setpoint_right - current_velocity_right;
   integral_left += error_left;
@@ -76,7 +75,7 @@ void updatePID(double current_velocity_left, double current_velocity_right) {
   prev_error_right = error_right;
 }
 
-static void mcpwm_example_gpio_initialize()
+static void mcpwmGpioInit()
 {
     printf("initializing mcpwm gpio...\n");
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, GPIO_PWM_LEFT);
@@ -86,7 +85,7 @@ static void mcpwm_example_gpio_initialize()
     gpio_set_direction(GPIO_DIR_RIGHT, GPIO_MODE_OUTPUT);
 }
 
-static void set_motor_velocity(
+static void setMotorVelocity(
         mcpwm_unit_t mcpwm_num,
         mcpwm_timer_t timer_num,
         float duty_cycle_left,
@@ -108,10 +107,10 @@ static void set_motor_velocity(
     mcpwm_set_duty_type(mcpwm_num, timer_num, MCPWM_OPR_B, MCPWM_DUTY_MODE_0); 
 }
 
-static void motor_controller(void *arg)
+static void motorController(void *arg)
 {
     //1. mcpwm gpio initialization
-    mcpwm_example_gpio_initialize();
+    mcpwmGpioInit();
 
     //2. initial mcpwm configuration
     printf("Configuring Initial Parameters of mcpwm...\n");
@@ -124,15 +123,25 @@ static void motor_controller(void *arg)
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);    //Configure PWM0A & PWM0B with above settings
 
     while (1) {
+        updateCmdWheelVelocities();
         direction_left = (setpoint_left < 0) ? 1 : 0;
         direction_right = (setpoint_right < 0) ? 0 : 1;
 
-        set_motor_velocity(MCPWM_UNIT_0, MCPWM_TIMER_0, duty_cycle_left, duty_cycle_right, direction_left, direction_right);
+        setMotorVelocity(MCPWM_UNIT_0, MCPWM_TIMER_0, duty_cycle_left, duty_cycle_right, direction_left, direction_right);
         vTaskDelay(500 / portTICK_RATE_MS);
     }
 }
 
-void encoder_reader(void){
+static void updateCmdWheelVelocities(void)
+{
+    float cmd_vel_x, cmd_vel_z;
+    getCmdVel(cmd_vel_x, cmd_vel_z);    
+    // calculate left and right wheel velocities from angular z and linear x velocities
+    setpoint_left = (cmd_vel_x - cmd_vel_z * wheelbase / 2.0);
+    setpoint_right = (cmd_vel_x + cmd_vel_z * wheelbase / 2.0);
+}
+
+void encoderReader(void){
     // Rotary encoder underlying device is represented by a PCNT unit in this example
     uint32_t pcnt_unit_enc_left = 0;
     uint32_t pcnt_unit_enc_right = 1;
@@ -179,14 +188,16 @@ void encoder_reader(void){
         float vel_z = (vel_right - vel_left) / wheelbase;
         
         publishOdometry(vel_x, vel_z);
-        vTaskDelay(pdMS_TO_TICKS(100));
+
         updatePID(vel_left, vel_right); //m/s
         encoder_left_prev_val = encoder_left_val;
         encoder_right_prev_val = encoder_right_val;
+        
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
-void odom_publisher(void)
+void odomPublisher(void)
 {
     float vel_x = (vel_left + vel_right) / 2.0;
     float vel_z = (vel_right - vel_left) / wheelbase;
@@ -196,7 +207,8 @@ void odom_publisher(void)
 }
 void app_main(void)
 {   
-    xTaskCreate(encoder_reader, "encoder_reader", 4096, NULL, 5, NULL);
-    xTaskCreate(motor_controller, "motor_controller", 4096, NULL, 4, NULL);
-    // xTaskCreate(odom_publisher, "odom_publisher", 4096, NULL, 3, NULL);
+    xTaskCreate(encoderReader, "encoderReader", 4096, NULL, 5, NULL);
+    xTaskCreate(motorController, "motorController", 4096, NULL, 4, NULL);
+    // TODO: check if odom publisher can run as a separate task
+    // xTaskCreate(odomPublisher, "odomPublisher", 4096, NULL, 3, NULL);
 }

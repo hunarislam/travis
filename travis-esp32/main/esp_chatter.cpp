@@ -34,7 +34,7 @@ void cmdVelCallback(const geometry_msgs::Twist& cmd_vel)
   angular_z = cmd_vel.angular.z;
 }
 
-void getCmdVel(float* vel_x, float* vel_z)
+void getCmdVel(float& vel_x, float& vel_z)
 {
   *vel_x = linear_x;
   *vel_z = angular_z;
