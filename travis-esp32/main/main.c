@@ -27,6 +27,7 @@ static const char *TAG = "Wheel Velocities";
 // EncB: D22          ////
 //////////////////////////
 
+// PID Constants
 double kp_left = 4;
 double ki_left = 0;
 double kd_left = 0;
@@ -35,27 +36,32 @@ double kp_right = 3.7;
 double ki_right = 0;
 double kd_right = 0;
 
+// Encoder Constants
 double wheelbase = 0.284;
+// TODO: Change setpoints accourding to the cmd_vel
 double setpoint_left = 10;  // desired velocity in m/s
-double setpoint_right = -10; // desired velocity in m/s
-double error_left;
-double error_right;
-double prev_error_left = 0;
-double prev_error_right = 0;
-double integral_left = 0;
-double integral_right = 0;
-double derivative_left;
-double derivative_right;
-double duty_cycle_left;
-double duty_cycle_right;
+double setpoint_right = 10; // desired velocity in m/s
 bool direction_left = 0; // Forward
 bool direction_right = 1; // Forward
-float vel_left, vel_right;
 
 #define GPIO_PWM_LEFT 13  //Set GPIO 13 as PWM0A / Left PWM
 #define GPIO_PWM_RIGHT 15   //Set GPIO 15 as PWM0B / Right PWM
 #define GPIO_DIR_LEFT GPIO_NUM_12
 #define GPIO_DIR_RIGHT GPIO_NUM_2
+
+// PID Variables
+double error_left;
+double error_right;
+double prev_error_left;
+double prev_error_right;
+double integral_left;
+double integral_right;
+double derivative_left;
+double derivative_right;
+double duty_cycle_left;
+double duty_cycle_right;
+float vel_left, vel_right;
+
 
 void updatePID(double current_velocity_left, double current_velocity_right) {
   error_left = setpoint_left - current_velocity_left;
@@ -150,7 +156,7 @@ void encoder_reader(void){
     ESP_ERROR_CHECK(encoder_right->start(encoder_right));
 
     // Setup rosserial
-    rosserial_setup();
+    rosserialSetup();
 
     // Report counter value
     int encoder_left_val = 0;
@@ -168,11 +174,11 @@ void encoder_reader(void){
         vel_right = 3.1415 * (encoder_right_val - encoder_right_prev_val) / 30;
         
         ESP_LOGI(TAG, "%f, %f, %f", vel_left, vel_right, duty_cycle_left);
-        // rosserial_publish(vel_left + vel_right);
+
         float vel_x = (vel_left + vel_right) / 2.0;
         float vel_z = (vel_right - vel_left) / wheelbase;
         
-        odom_pub(vel_x, vel_z);
+        publishOdometry(vel_x, vel_z);
         vTaskDelay(pdMS_TO_TICKS(100));
         updatePID(vel_left, vel_right); //m/s
         encoder_left_prev_val = encoder_left_val;
@@ -185,12 +191,11 @@ void odom_publisher(void)
     float vel_x = (vel_left + vel_right) / 2.0;
     float vel_z = (vel_right - vel_left) / wheelbase;
 
-    odom_pub(vel_x, vel_z);
+    publishOdometry(vel_x, vel_z);
     vTaskDelay(pdMS_TO_TICKS(100));
 }
 void app_main(void)
 {   
-    printf("Testing brushed motor...\n");
     xTaskCreate(encoder_reader, "encoder_reader", 4096, NULL, 5, NULL);
     xTaskCreate(motor_controller, "motor_controller", 4096, NULL, 4, NULL);
     // xTaskCreate(odom_publisher, "odom_publisher", 4096, NULL, 3, NULL);

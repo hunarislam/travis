@@ -5,9 +5,13 @@
 extern "C" {
 #endif
 
-void rosserial_setup();
+void rosserialSetup();
 
-void odom_pub(float vel_x, float vel_z);
+void publishOdometry(float vel_x, float vel_z);
+
+void cmdVelCallback(const geometry_msgs::Twist& cmd_vel);
+
+void getCmdVel(float* vel_x, float* vel_z);
 
 #ifdef __cplusplus
 }
