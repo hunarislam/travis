@@ -9,7 +9,7 @@ void rosserialSetup();
 
 void publishOdometry(float vel_x, float vel_z);
 
-void cmdVelCallback(const geometry_msgs::Twist& cmd_vel);
+// void cmdVelCallback(const geometry_msgs::Twist& cmd_vel);
 
 void getCmdVel(float* vel_x, float* vel_z);
 

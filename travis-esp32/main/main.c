@@ -107,6 +107,15 @@ static void setMotorVelocity(
     mcpwm_set_duty_type(mcpwm_num, timer_num, MCPWM_OPR_B, MCPWM_DUTY_MODE_0); 
 }
 
+static void updateCmdWheelVelocities(void)
+{
+    float cmd_vel_x, cmd_vel_z;
+    getCmdVel(&cmd_vel_x, &cmd_vel_z);    
+    // calculate left and right wheel velocities from angular z and linear x velocities
+    setpoint_left = (cmd_vel_x - cmd_vel_z * wheelbase / 2.0);
+    setpoint_right = (cmd_vel_x + cmd_vel_z * wheelbase / 2.0);
+}
+
 static void motorController(void *arg)
 {
     //1. mcpwm gpio initialization
@@ -132,16 +141,7 @@ static void motorController(void *arg)
     }
 }
 
-static void updateCmdWheelVelocities(void)
-{
-    float cmd_vel_x, cmd_vel_z;
-    getCmdVel(cmd_vel_x, cmd_vel_z);    
-    // calculate left and right wheel velocities from angular z and linear x velocities
-    setpoint_left = (cmd_vel_x - cmd_vel_z * wheelbase / 2.0);
-    setpoint_right = (cmd_vel_x + cmd_vel_z * wheelbase / 2.0);
-}
-
-void encoderReader(void){
+void encoderReader(void *arg){
     // Rotary encoder underlying device is represented by a PCNT unit in this example
     uint32_t pcnt_unit_enc_left = 0;
     uint32_t pcnt_unit_enc_right = 1;
