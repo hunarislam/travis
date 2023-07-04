@@ -8,6 +8,7 @@
 
   <license>MIT</license>
 
+  <depend>travis_control</depend>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>
   <build_depend>move_base_msgs</build_depend>

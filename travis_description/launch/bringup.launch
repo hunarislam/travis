@@ -6,6 +6,8 @@
   
   <arg name="serial_node_start_delay" default="10.0" />
 
+  <node pkg="travis_control" name="odom_tf_pub" type="odom_tf_pub.py" output="screen" />
+
   <node pkg="rosserial_python" name="serial_node" type="serial_node.py" output="screen" launch-prefix="bash -c 'sleep $(arg serial_node_start_delay); $0 $@' " required="true">
     <param name="port" type="string" value="/dev/ttyUSB1"/>
     <param name="baud" type="string" value="115200"/>
