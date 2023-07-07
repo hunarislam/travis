@@ -66,7 +66,7 @@ void publishOdometry(float vel_x, float vel_z)
   // Create and populate the Odometry message
   odomMsg.header.stamp = nh.now();
   odomMsg.header.frame_id = "odom";
-  odomMsg.child_frame_id = "base_link";
+  odomMsg.child_frame_id = "base_footprint";
 
   // Position
   odomMsg.pose.pose.position.x = x;
