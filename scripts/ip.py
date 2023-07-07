@@ -69,7 +69,10 @@ def send_email(sender_email, sender_password, receiver_emails, subject, body, im
 
 
 wait_for_internet_connection()
-local_ip = get_local_ip_address()
+local_ip = None
+while local_ip is None
+    local_ip = get_local_ip_address()
+    time.sleep(1)
 
 print("Local IP address:", local_ip)
 
