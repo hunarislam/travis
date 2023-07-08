@@ -10,6 +10,7 @@
 #include "soc/mcpwm_struct.h"
 #include "driver/gpio.h"
 #include <time.h>
+#include <math.h>
 
 static const char *TAG = "Wheel Velocities";
    
@@ -71,15 +72,19 @@ unsigned long millis() {
     return milliseconds;
 }
 
-// Helper function to limit a value to a minimum value
+// Helper functions to limit a value
 float limitToMinimum(float value, float minimum) {
   return (value < minimum) ? minimum : value;
 }
 
+float limitToMaximum(float value, float maximum) {
+  return (value > maximum) ? maximum : value;
+}
+
 void updatePID(float current_velocity_left, float current_velocity_right) {
   // Calculate the error between the desired setpoint and the current velocity for each system
-  error_left = setpoint_left - current_velocity_left;
-  error_right = setpoint_right - current_velocity_right;
+  error_left = fabs(setpoint_left) - fabs(current_velocity_left);
+  error_right = fabs(setpoint_right) - fabs(current_velocity_right);
 
   // Calculate the integral of the error for each system
   integral_left += error_left;
@@ -93,7 +98,7 @@ void updatePID(float current_velocity_left, float current_velocity_right) {
   duty_cycle_left = kp_left * error_left + ki_left * integral_left + kd_left * derivative_left;
   duty_cycle_right = kp_right * error_right + ki_right * integral_right + kd_right * derivative_right;
 
-  // Limit the duty cycle to a minimum value of 0
+  // Limit the duty cycle
   duty_cycle_left = limitToMinimum(duty_cycle_left, 0);
   duty_cycle_right = limitToMinimum(duty_cycle_right, 0);
 
