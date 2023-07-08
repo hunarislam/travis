@@ -9,6 +9,7 @@
 #include "soc/mcpwm_reg.h"
 #include "soc/mcpwm_struct.h"
 #include "driver/gpio.h"
+#include <chrono>
 
 static const char *TAG = "Wheel Velocities";
    
@@ -61,6 +62,10 @@ float setpoint_left;
 float setpoint_right;
 float vel_left, vel_right;
 
+unsigned long millis() {
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
 
 void updatePID(float current_velocity_left, float current_velocity_right) {
   error_left = setpoint_left - current_velocity_left;
