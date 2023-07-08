@@ -174,14 +174,20 @@ void encoderReader(void *arg){
     int encoder_right_prev_val = 0;
     vel_left = 0;
     vel_right = 0;
+    unsigned long last_time = 0;
+    unsigned long current_time = 0;
     while (1)
-    {
+    {   
         encoder_left_val = encoder_left->get_counter_value(encoder_left);
         encoder_right_val = encoder_right->get_counter_value(encoder_right);
 
-        vel_left = 3.1415 * (encoder_left_val -  encoder_left_prev_val) / 30;
-        vel_right = 3.1415 * (encoder_right_val - encoder_right_prev_val) / 30;
-        
+        current_time = millis();
+
+        vel_left = 3.1415 * (encoder_left_val -  encoder_left_prev_val) / (30 * (current_time - last_time));
+        vel_right = 3.1415 * (encoder_right_val - encoder_right_prev_val) / (30 * (current_time - last_time));
+
+        last_time = current_time;
+
         ESP_LOGI(TAG, "%f, %f, %f", vel_left, vel_right, duty_cycle_left);
 
         float vel_x = (vel_left + vel_right) / 2.0;
