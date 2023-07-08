@@ -39,6 +39,7 @@ float kd_right = 0;
 
 // Encoder Constants
 float wheelbase = 0.284;
+float wheel_dia = 0.10;
 bool direction_left = 0; // Forward
 bool direction_right = 1; // Forward
 
@@ -62,12 +63,12 @@ float setpoint_left;
 float setpoint_right;
 float vel_left, vel_right;
 
-unsigned long millis() {
+unsigned long getTime() {
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
 
-    long milliseconds = currentTime.tv_sec * 1000 + currentTime.tv_nsec / 1000000;
-    return milliseconds;
+    long seconds = currentTime.tv_sec + currentTime.tv_nsec / 1000000000;
+    return seconds;
 }
 
 void updatePID(float current_velocity_left, float current_velocity_right) {
@@ -184,15 +185,27 @@ void encoderReader(void *arg){
     vel_right = 0;
     unsigned long last_time = 0;
     unsigned long current_time = 0;
+    unsigned long time_diff = 0;
+    float wheel_circumference = wheel_dia * 3.14159;
+    int encoder_resolution = 30;
+    float ticks_per_second_left = 0.0;
+    float ticks_per_second_right = 0.0;
     while (1)
     {   
         encoder_left_val = encoder_left->get_counter_value(encoder_left);
         encoder_right_val = encoder_right->get_counter_value(encoder_right);
 
-        current_time = millis();
+        current_time = getTime();
+        time_diff = current_time - last_time;
 
-        vel_left = 3.1415 * (encoder_left_val -  encoder_left_prev_val) / (30 * (current_time - last_time));
-        vel_right = 3.1415 * (encoder_right_val - encoder_right_prev_val) / (30 * (current_time - last_time));
+        ticks_per_second_left = (float)(encoder_left_val - encoder_left_prev_val) / (float)time_diff;
+        ticks_per_second_right = (float)(encoder_right_val - encoder_right_prev_val) / (float)time_diff;
+        vel_left = (wheel_circumference * ticks_per_second_left) / (float)encoder_resolution; // convert endcoder value to wheel velocity in m/s
+        vel_right = (wheel_circumference * ticks_per_second_right) / (float)encoder_resolution; // convert endcoder value to wheel velocity in m/s
+
+         
+        // vel_left = 3.14159 * (encoder_left_val -  encoder_left_prev_val) / (30 * (current_time - last_time));
+        // vel_right = 3.14159 * (encoder_right_val - encoder_right_prev_val) / (30 * (current_time - last_time));
 
         last_time = current_time;
 
