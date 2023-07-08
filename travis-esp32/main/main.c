@@ -29,13 +29,13 @@ static const char *TAG = "Wheel Velocities";
 //////////////////////////
 
 // PID Constants
-float kp_left = 4;
-float ki_left = 0;
-float kd_left = 0;
+float kp_left = 15.0;
+float ki_left = 03.5;
+float kd_left = 64.0;
 
-float kp_right = 3.7;
-float ki_right = 0;
-float kd_right = 0;
+float kp_right = 15.0;
+float ki_right = 03.5;
+float kd_right = 64.0;
 
 // Encoder Constants
 float wheelbase = 0.284;
@@ -63,26 +63,45 @@ float setpoint_left;
 float setpoint_right;
 float vel_left, vel_right;
 
-unsigned long getTime() {
+unsigned long millis() {
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
 
-    long seconds = currentTime.tv_sec + currentTime.tv_nsec / 1000000000;
-    return seconds;
+    unsigned long milliseconds = currentTime.tv_sec * 1000 + currentTime.tv_nsec / 1000000;
+    return milliseconds;
+}
+
+// Helper function to limit a value to a minimum value
+float limitToMinimum(float value, float minimum) {
+  return (value < minimum) ? minimum : value;
 }
 
 void updatePID(float current_velocity_left, float current_velocity_right) {
+  // Calculate the error between the desired setpoint and the current velocity for each system
   error_left = setpoint_left - current_velocity_left;
   error_right = setpoint_right - current_velocity_right;
+
+  // Calculate the integral of the error for each system
   integral_left += error_left;
   integral_right += error_right;
+
+  // Calculate the derivative of the error for each system
   derivative_left = error_left - prev_error_left;
   derivative_right = error_right - prev_error_right;
+
+  // Calculate the duty cycle (control output) for each system using the PID formula
   duty_cycle_left = kp_left * error_left + ki_left * integral_left + kd_left * derivative_left;
   duty_cycle_right = kp_right * error_right + ki_right * integral_right + kd_right * derivative_right;
+
+  // Limit the duty cycle to a minimum value of 0
+  duty_cycle_left = limitToMinimum(duty_cycle_left, 0);
+  duty_cycle_right = limitToMinimum(duty_cycle_right, 0);
+
+  // Update the previous error for each system
   prev_error_left = error_left;
   prev_error_right = error_right;
 }
+
 
 static void mcpwmGpioInit()
 {
@@ -108,6 +127,8 @@ static void setMotorVelocity(
     gpio_set_level(GPIO_DIR_RIGHT, direction_right);
 
     // Set motor speed
+    // int32_t pwm_duty_left = (uint32_t)(duty_cycle_left * 65535.0);
+    // int32_t pwm_duty_right = (uint32_t)(duty_cycle_right * 65535.0);
     mcpwm_set_duty(mcpwm_num, timer_num, MCPWM_OPR_A, duty_cycle_left);
     mcpwm_set_duty(mcpwm_num, timer_num, MCPWM_OPR_B, duty_cycle_right);
 
@@ -187,7 +208,7 @@ void encoderReader(void *arg){
     unsigned long current_time = 0;
     unsigned long time_diff = 0;
     float wheel_circumference = wheel_dia * 3.14159;
-    int encoder_resolution = 30;
+    int encoder_resolution = 300;
     float ticks_per_second_left = 0.0;
     float ticks_per_second_right = 0.0;
     while (1)
@@ -195,11 +216,11 @@ void encoderReader(void *arg){
         encoder_left_val = encoder_left->get_counter_value(encoder_left);
         encoder_right_val = encoder_right->get_counter_value(encoder_right);
 
-        current_time = getTime();
-        time_diff = current_time - last_time;
+        current_time = millis();
+        time_diff = (float)current_time - (float)last_time;
 
-        ticks_per_second_left = (float)(encoder_left_val - encoder_left_prev_val) / (float)time_diff;
-        ticks_per_second_right = (float)(encoder_right_val - encoder_right_prev_val) / (float)time_diff;
+        ticks_per_second_left = 1000 * (float)(encoder_left_val - encoder_left_prev_val) / (float)time_diff;
+        ticks_per_second_right = 1000 * (float)(encoder_right_val - encoder_right_prev_val) / (float)time_diff;
         vel_left = (wheel_circumference * ticks_per_second_left) / (float)encoder_resolution; // convert endcoder value to wheel velocity in m/s
         vel_right = (wheel_circumference * ticks_per_second_right) / (float)encoder_resolution; // convert endcoder value to wheel velocity in m/s
 
@@ -209,7 +230,7 @@ void encoderReader(void *arg){
 
         last_time = current_time;
 
-        ESP_LOGI(TAG, "%f, %f, %f", vel_left, vel_right, duty_cycle_left);
+        ESP_LOGI(TAG, "%f, %f, %f, %f", vel_left, vel_right, error_right, duty_cycle_right);
 
         float vel_x = (vel_left + vel_right) / 2.0;
         float vel_z = (vel_right - vel_left) / wheelbase;
