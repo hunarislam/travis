@@ -19,7 +19,7 @@ def odometry_callback(msg):
     rotation = (orientation.x, orientation.y, orientation.z, orientation.w)
 
     # Publish the transform
-    transform.sendTransform(translation, rotation, rospy.Time.now(), "base_footprint", "odom")
+    transform.sendTransform(translation, rotation, rospy.Time.now(), "robot_footprint", "odom")
 
 if __name__ == '__main__':
     rospy.init_node('odom_tf_pub')
@@ -28,4 +28,3 @@ if __name__ == '__main__':
     rospy.Subscriber('odom', Odometry, odometry_callback)
 
     rospy.spin()
-
