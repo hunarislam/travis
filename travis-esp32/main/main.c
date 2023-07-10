@@ -202,6 +202,12 @@ static void motorController(void *arg)
 
     while (1) {
         updateCmdWheelVelocities();
+        if( setpoint_left == 0 && setpoint_right == 0)
+        {
+            setMotorVelocity(MCPWM_UNIT_0, MCPWM_TIMER_0, 0, 0, 0, 0);
+            vTaskDelay(500 / portTICK_RATE_MS);
+            continue;
+        }
         direction_left = (setpoint_left < 0) ? 1 : 0;
         direction_right = (setpoint_right < 0) ? 0 : 1;
 
