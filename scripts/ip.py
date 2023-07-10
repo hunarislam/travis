@@ -22,7 +22,7 @@ def get_local_ip_address():
 
     # Find the line containing the IP address information
     for line in output.splitlines():
-        if 'inet' in line and 'wlp45s0' in line:
+        if 'inet' in line and 'wlan0' in line:
             # Extract the IP address from the line
             ip_address = line.strip().split()[1].split('/')[0]
             return ip_address
