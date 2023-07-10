@@ -22,7 +22,7 @@ def get_local_ip_address():
 
     # Find the line containing the IP address information
     for line in output.splitlines():
-        if 'inet' in line and 'wlan' in line:
+        if 'inet' in line and 'wlp45s0' in line:
             # Extract the IP address from the line
             ip_address = line.strip().split()[1].split('/')[0]
             return ip_address
@@ -70,9 +70,7 @@ def send_email(sender_email, sender_password, receiver_emails, subject, body, im
 
 wait_for_internet_connection()
 local_ip = None
-while local_ip is None
-    local_ip = get_local_ip_address()
-    time.sleep(1)
+local_ip = get_local_ip_address()
 
 print("Local IP address:", local_ip)
 
