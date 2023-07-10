@@ -44,6 +44,8 @@ float wheel_dia = 0.10;
 bool direction_left = 0; // Forward
 bool direction_right = 1; // Forward
 
+float accel_limit = 0.3;
+
 #define GPIO_PWM_LEFT 13  //Set GPIO 13 as PWM0A / Left PWM
 #define GPIO_PWM_RIGHT 15   //Set GPIO 15 as PWM0B / Right PWM
 #define GPIO_DIR_LEFT GPIO_NUM_12
@@ -63,6 +65,12 @@ float duty_cycle_right;
 float setpoint_left;
 float setpoint_right;
 float vel_left, vel_right;
+unsigned long current_cmd_vel_time;
+unsigned long last_cmd_vel_time;
+float current_cmd_vel_left;
+float current_cmd_vel_right;
+float last_cmd_vel_left;
+float last_cmd_vel_right;
 
 unsigned long millis() {
     struct timespec currentTime;
@@ -142,13 +150,39 @@ static void setMotorVelocity(
     mcpwm_set_duty_type(mcpwm_num, timer_num, MCPWM_OPR_B, MCPWM_DUTY_MODE_0); 
 }
 
+float calculateNewVelocity(float setpoint, float dt, float last_velocity)
+{
+  float max_acceleration = accel_limit * dt;
+  float error = setpoint - last_velocity;
+  float new_velocity = last_velocity;
+
+  if (error > 0) 
+  { // Need to accelerate
+    float acceleration = std::min(error, max_acceleration);
+    new_velocity += acceleration;
+  }
+  else if (error < 0) 
+  { // Need to decelerate
+    float acceleration = std::min(-error, max_acceleration);
+    new_velocity -= acceleration;
+  }
+
+  return new_velocity;
+}
+
 static void updateCmdWheelVelocities(void)
 {
     float cmd_vel_x, cmd_vel_z;
+    current_cmd_vel_time = millis();
+    float dt = (float)current_cmd_vel_time - (float)last_cmd_vel_time;
     getCmdVel(&cmd_vel_x, &cmd_vel_z);    
     // calculate left and right wheel velocities from angular z and linear x velocities
-    setpoint_left = (cmd_vel_x - cmd_vel_z * wheelbase / 2.0);
-    setpoint_right = (cmd_vel_x + cmd_vel_z * wheelbase / 2.0);
+    setpoint_left = calculateNewVelocity((cmd_vel_x - cmd_vel_z * wheelbase / 2.0), dt, last_cmd_vel_left);
+    setpoint_right = calculateNewVelocity((cmd_vel_x + cmd_vel_z * wheelbase / 2.0), dt, last_cmd_vel_right);
+    last_cmd_vel_left = setpoint_left;
+    last_cmd_vel_right = setpoint_right;
+    
+    last_cmd_vel_time = current_cmd_vel_time;
 }
 
 static void motorController(void *arg)
@@ -228,10 +262,6 @@ void encoderReader(void *arg){
         ticks_per_second_right = 1000 * (float)(encoder_right_val - encoder_right_prev_val) / (float)time_diff;
         vel_left = (wheel_circumference * ticks_per_second_left) / (float)encoder_resolution; // convert endcoder value to wheel velocity in m/s
         vel_right = (wheel_circumference * ticks_per_second_right) / (float)encoder_resolution; // convert endcoder value to wheel velocity in m/s
-
-         
-        // vel_left = 3.14159 * (encoder_left_val -  encoder_left_prev_val) / (30 * (current_time - last_time));
-        // vel_right = 3.14159 * (encoder_right_val - encoder_right_prev_val) / (30 * (current_time - last_time));
 
         last_time = current_time;
 
