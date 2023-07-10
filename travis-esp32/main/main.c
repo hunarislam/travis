@@ -157,12 +157,12 @@ float calculateNewVelocity(float setpoint, float dt, float last_velocity)
 
   if (error > 0) 
   { // Need to accelerate
-    float acceleration = std::min(error, max_acceleration);
+    float acceleration = limitToMaximum(error, max_acceleration);
     new_velocity += acceleration;
   }
   else if (error < 0) 
   { // Need to decelerate
-    float acceleration = std::min(-error, max_acceleration);
+    float acceleration = limitToMaximum(-error, max_acceleration);
     new_velocity -= acceleration;
   }
 
@@ -178,8 +178,8 @@ static void updateCmdWheelVelocities(void)
     // calculate left and right wheel velocities from angular z and linear x velocities
     setpoint_left = calculateNewVelocity((cmd_vel_x - cmd_vel_z * wheelbase / 2.0), dt, last_cmd_vel_left);
     setpoint_right = calculateNewVelocity((cmd_vel_x + cmd_vel_z * wheelbase / 2.0), dt, last_cmd_vel_right);
-    last_cmd_vel_left = setpoint_left;
-    last_cmd_vel_right = setpoint_right;
+    last_cmd_vel_left = setpoint_left == -0.0 ? 0.0 : setpoint_left;
+    last_cmd_vel_right = setpoint_right == -0.0 ? 0.0 : setpoint_right;
     
     last_cmd_vel_time = current_cmd_vel_time;
 }
