@@ -10,6 +10,9 @@
       args="0 0 0 0 0 0 map odom 100"/> -->
 <!-- <node name="static_tf0" pkg="tf" type="static_transform_publisher" args="2 0 0 0 0 0 /map /robot_footprint 100"/> -->
   <!-- Localization-->
+  <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" required="true"/>
+  <include file="$(find travis_description)/launch/rviz.launch"/>
+
   <node pkg="amcl" type="amcl" name="amcl" output="screen">
     <remap from="scan" to="laser/scan"/>
 

@@ -13,4 +13,6 @@
     <param name="baud" type="string" value="115200"/>
   </node>
 
+  <include file="$(find travis_description)/launch/amcl.launch" />
+
 </launch>
