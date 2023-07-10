@@ -81,7 +81,7 @@ sender_email = "travisnocat@gmail.com"
 sender_password = "dbwrtoevucdxbdys"
 receiver_emails = ["carpit680@gmail.com", "hunar.islam01@gmail.com"]  # Add your desired receiver email addresses here
 subject = "Local IP Address"
-body = f"The local IP address on the WiFi network is: {local_ip}"
+body = f"The local IP address on the WiFi network is: {local_ip} \n Use the following to connect to ssh remotely then vnc to localhost:5900 \n $ ssh -L 5900:localhost:5900 hunar@7.tcp.ngrok.io -p 20432"
 important = True  # Set to True if you want to mark the email as important
 
 send_email(sender_email, sender_password, receiver_emails, subject, body, important)
