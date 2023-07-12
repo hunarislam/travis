@@ -25,7 +25,7 @@ float theta = 0.0;
 
 void cmdVelCallback(const geometry_msgs::Twist& cmd_vel)
 {
-  linear_x = cmd_vel.linear.x;
+  linear_x = -cmd_vel.linear.x;
   angular_z = cmd_vel.angular.z;
 }
 
