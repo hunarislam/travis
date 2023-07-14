@@ -2,7 +2,7 @@
 <launch>
   
   <!-- SLAM -->
-  <include file="$(find gmapping)/launch/slam_gmapping.launch" />
+  <include file="$(find slam_toolbox)/launch/lifelong.launch" />
 
   <!-- Move base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
