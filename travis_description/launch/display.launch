@@ -13,16 +13,16 @@
   </node>
 
   <!-- Send robot states to tf -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
+  <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/> -->
 
   <node name="rviz" pkg="rviz" args="-d $(arg rvizconfig)" type="rviz" required="true"/>
 
    <!-- Map server -->
-  <!-- <arg name="map_file" default="$(find travis_description)/maps/cafu_map.yaml"/>
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" /> -->
+  <arg name="map_file" default="$(find travis_description)/maps/map.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
   <!-- Place map frame at odometry frame -->
-  <!-- <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster"
-      args="0 0 0 0 0 0 map odom 100"/> -->
+  <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster"
+      args="0 0 0 0 0 0 map odom 100"/>
   
 </launch>
