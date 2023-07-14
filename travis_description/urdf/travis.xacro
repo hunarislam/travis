@@ -520,7 +520,7 @@
 </joint>
 
 <joint name="Rigid24" type="fixed">
-  <origin xyz="-0.0455 0.0 0.041512" rpy="0 0 0"/>
+  <origin xyz="-0.0455 0.0 0.041512" rpy="0 0 3.1415"/>
   <parent link="rp_lidar_base_1"/>
   <child link="lidar_1"/>
 </joint>
