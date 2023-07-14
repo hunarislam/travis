@@ -356,6 +356,7 @@ void SlamGMapping::publishLoop(double transform_publish_period){
   ros::Rate r(1.0 / transform_publish_period);
   while(ros::ok()){
     publishTransform();
+    ROS_WARN("*&$#!@#$%^&*(&^%$#@#$%^&*(*&^%$#$%^&publishTransform");
     r.sleep();
   }
 }
