@@ -1,0 +1,43 @@
+<launch>
+
+
+  <include file="$(find teleop_twist_joy)/launch/teleop.launch" />
+
+</launch>
+
+<?xml version="1.0"?>
+<launch>
+  
+  <!-- SLAM -->
+  <include file="$(find gmapping)/launch/slam_gmapping.launch" />
+
+  <!-- Move base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find travis_description)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find travis_description)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find travis_description)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find travis_description)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find travis_description)/config/base_local_planner_params.yaml" command="load" />
+
+    <remap from="cmd_vel" to="cmd_vel"/>
+    <remap from="odom" to="odom"/>
+    <remap from="scan" to="laser/scan"/>
+
+    <!-- A fast, interpolated global planner built as a more flexible replacement to navfn.
+    (navfn/NavfnROS, global_planner/GlobalPlanner, carrot_planner/CarrotPlanner) -->
+    <param name="base_global_planner" type="string" value="global_planner/GlobalPlanner" />
+
+    <!-- provides an interface for local planners used in navigation -->
+    <!-- base_local_planner/TrajectoryPlannerROS, eband_local_planner/EBandPlannerROS, teb_local_planner/TebLocalPlannerROS  -->
+    <!-- sudo apt-get install ros-kinetic-eband-local-planner -->
+    <!-- sudo apt-get install ros-kinetic-teb-local-planner -->
+    <!-- <param name="base_local_planner" value="base_local_planner/TrajectoryPlannerROS"/> -->
+    <!-- <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" /> -->
+    <param name="base_local_planner" value="eband_local_planner/EBandPlannerROS"/>
+    <param name="controller_frequency" value="30.0" />
+    <param name="planner_frequency" value="20.0" />
+
+
+  </node>
+
+</launch>

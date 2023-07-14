@@ -4,6 +4,6 @@
 
   <include file="$(find travis_description)/launch/display.launch" />
 
-  <include file="$(find travis_description)/launch/amcl.launch" />
+  <include file="$(find travis_description)/launch/slam_nav.launch" />
 
 </launch>
