@@ -12,8 +12,8 @@
 #include <time.h>
 #include <math.h>
 
-static const char *TAG = "Wheel Velocities";
-   
+static const char *TAG = "Travis Base";
+
 
 ///////PIN BINDINGS///////
 // Left Motor         ////
@@ -40,7 +40,7 @@ float kd_right = 64.0;
 
 // Encoder Constants
 float wheelbase = 0.284;
-float wheel_dia = 0.10;
+float wheel_dia = 0.953;
 bool direction_left = 0; // Forward
 bool direction_right = 1; // Forward
 
