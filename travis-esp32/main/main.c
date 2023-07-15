@@ -40,7 +40,7 @@ float kd_right = 64.0;
 
 // Encoder Constants
 float wheelbase = 0.284;
-float wheel_dia = 0.953;
+float wheel_dia = 0.0953;
 bool direction_left = 0; // Forward
 bool direction_right = 1; // Forward
 
@@ -253,7 +253,7 @@ void encoderReader(void *arg){
     unsigned long current_time = 0;
     unsigned long time_diff = 0;
     float wheel_circumference = wheel_dia * 3.14159;
-    int encoder_resolution = 300;
+    int encoder_resolution = 560;
     float ticks_per_second_left = 0.0;
     float ticks_per_second_right = 0.0;
     while (1)
