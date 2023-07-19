@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import subprocess
 import time
 import socket
@@ -16,16 +17,22 @@ def check_internet_connection():
 
 
 def get_local_ip_address():
-    command = "ip a"
-    result = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    output = result.communicate()[0].decode()
+    # command = "ip a"
+    # result = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    # output = result.communicate()[0].decode()
 
-    # Find the line containing the IP address information
-    for line in output.splitlines():
-        if 'inet' in line and 'wlan0' in line:
-            # Extract the IP address from the line
-            ip_address = line.strip().split()[1].split('/')[0]
-            return ip_address
+    # # Find the line containing the IP address information
+    # for line in output.splitlines():
+    #     if 'inet' in line and 'wlan0' in line:
+    #         # Extract the IP address from the line
+    #         ip_address = line.strip().split()[1].split('/')[0]
+    #         return ip_address
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
+
 
 
 def wait_for_internet_connection():
@@ -70,7 +77,12 @@ def send_email(sender_email, sender_password, receiver_emails, subject, body, im
 
 wait_for_internet_connection()
 local_ip = None
-local_ip = get_local_ip_address()
+while local_ip is None:
+    try:
+        local_ip = get_local_ip_address()
+    except:
+        pass
+    time.sleep(1)
 
 print("Local IP address:", local_ip)
 
@@ -79,7 +91,7 @@ sender_email = "travisnocat@gmail.com"
 sender_password = "dbwrtoevucdxbdys"
 receiver_emails = ["carpit680@gmail.com", "hunar.islam01@gmail.com"]  # Add your desired receiver email addresses here
 subject = "Local IP Address"
-body = f"The local IP address on the WiFi network is: {local_ip} \n Use the following to connect to ssh remotely then vnc to localhost:5900 \n $ ssh -L 5900:localhost:5900 hunar@7.tcp.ngrok.io -p 20432"
+body = f"The local IP address on the WiFi network is: {local_ip} \n Use the following to connect to ssh remotely then vnc to localhost:5900 \n ssh -L 5900:localhost:5900 hunar@7.tcp.ngrok.io -p 20432"
 important = True  # Set to True if you want to mark the email as important
 
 send_email(sender_email, sender_password, receiver_emails, subject, body, important)
